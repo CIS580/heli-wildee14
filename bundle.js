@@ -29,6 +29,13 @@ var input = {
   left: false,
   right: false
 }
+var camera= {
+ minX: 100,
+ maxX: 500,
+ offsetX: 100,
+ x: 0,
+ y: 0
+}
 
 /**
  * @function onkeydown
@@ -109,7 +116,7 @@ masterLoop(performance.now());
  * the number of milliseconds passed since the last frame.
  */
 function update(elapsedTime) {
-  var speed = 1;
+  var speed = 10;
 
   // set the velocity
   player.velocity.x = 0;
@@ -127,6 +134,17 @@ function update(elapsedTime) {
   // move the player
   player.position.x += player.velocity.x;
   player.position.y += player.velocity.y;
+  //update camera
+  camera.offsetX += player.velocity.x;
+  if(camera.offsetX > camera.maxX){
+    camera.x += camera.offsetX-camera.maxX;
+    camera.offsetX = camera.maxX;
+  }
+  if(camera.offsetX < camera.minX){
+    camera.x -= camera.offsetX - camera.minX;
+    camera.offsetX = camera.minX;
+  }
+  if(camera.x < 0) camera.x = 10;
 }
 
 /**
@@ -138,13 +156,23 @@ function update(elapsedTime) {
   */
 function render(elapsedTime, ctx) {
   // Render the backgrounds
+  ctx.save()
+  ctx.translate(-camera.x*0.2,0);
   ctx.drawImage(backgrounds[2], 0, 0);
-  ctx.drawImage(backgrounds[1], 0, 0);
-  ctx.drawImage(backgrounds[0], 0, 0);
+  ctx.restore();
 
-  // Render the player
   ctx.save();
-  ctx.translate(player.position.x, player.position.y);
+  ctx.translate(-camera.x*0.5,0);
+  ctx.drawImage(backgrounds[1], 0, 0);
+  ctx.restore();
+
+  cts.save();
+  ctx.translate(-camera.x,0);
+  ctx.drawImage(backgrounds[0], 0, 0);
+  ctx.restore();
+  // Renderthe player
+  ctx.save();
+  ctx.translate(player.position.x-camera.x,player.position.y);
   ctx.rotate(player.angle);
   ctx.drawImage(player.img, 0, 0, 131, 53, -60, 0, 131, 53);
   ctx.restore();
